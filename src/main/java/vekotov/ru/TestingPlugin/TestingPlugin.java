@@ -90,6 +90,8 @@ public class TestingPlugin extends JavaPlugin {
                 Quest quest = quests.get(playerquests.get(name));
                 if (quest.right_answer == answer) {
                     player.sendMessage("ПОЗДРАВЛЯЕМ ТЕБЯ!!!!!!!!");
+                }else{
+                    player.sendMessage("Короче ты ответил неверно.");
                 }
                 playerquests.remove(name);
                 return true;
