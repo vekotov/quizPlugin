@@ -30,18 +30,18 @@ public class TestingPlugin extends JavaPlugin {
         return Quest.ANSWER.A;
     }
 
-    public void loadConfigs(){
+    public void loadConfigs() {
         if (!quests_file.exists()) {
             saveResource("quests.yml", false);
         }
 
         try {
-            for(String key : quests_config.getConfigurationSection("Quests").getKeys(false)){
+            for (String key : quests_config.getConfigurationSection("Quests").getKeys(false)) {
                 String desc = quests_config.getString("Quests." + key + ".description");
                 String right_answer = quests_config.getString("Quests." + key + ".right_answer");
                 String[] answers = new String[4];
                 int t = 0;
-                for(String answer_key : quests_config.getConfigurationSection("Quests." + key + ".answers").getKeys(false)) {
+                for (String answer_key : quests_config.getConfigurationSection("Quests." + key + ".answers").getKeys(false)) {
                     answers[t] = quests_config.getString("Quests." + key + ".answers." + answer_key);
                     t++;
                 }
@@ -72,36 +72,44 @@ public class TestingPlugin extends JavaPlugin {
         if (!(sender instanceof Player)) {
             sender.sendMessage(ChatColor.RED + "Сцуко команды для игроков только");
             return true;
+        }
+        if (!IsWorking) {
+            sender.sendMessage("Плагин здох");
+            return true;
         } else {
-            Player player = (Player)sender;
+            Player player = (Player) sender;
             String name = player.getName();
             if (cmd.getName().equalsIgnoreCase("answer")) {
                 if (args.length != 1) return false;
-
                 if (!playerquests.containsKey(name)) {
                     player.sendMessage("Нуб введи /startgame для начала, ты же еще даже вопросы не получил.");
                     return true;
                 }
-
-                player.sendMessage("UR ANSWER: " + args[0]);
+                String answer_text = args[0];
+                Quest.ANSWER answer = string_to_enum(answer_text);
+                Quest quest = quests.get(playerquests.get(name));
+                if (quest.right_answer == answer) {
+                    player.sendMessage("ПОЗДРАВЛЯЕМ ТЕБЯ!!!!!!!!");
+                }
+                playerquests.remove(name);
                 return true;
             } else if (cmd.getName().equalsIgnoreCase("startgame")) {
                 if (args.length != 0) return false;
 
                 int min_id = 1;
                 int max_id = playerquests.size();
-                int generated_id = min_id + (int)(Math.random() * max_id);
+                int generated_id = min_id + (int) (Math.random() * max_id);
                 playerquests.put(name, generated_id);
                 Quest quest = quests.get(generated_id);
                 player.sendMessage("Вопрос: " + quest.description + " (вы можете кликнуть на верный ответ в чате).");
                 player.sendMessage("Ответы:");
                 String[] answers = quest.answers;
 
-                for(int t = 0; t < answers.length; t++) {
+                for (int t = 0; t < answers.length; t++) {
                     String s = answers[t];
                     TextComponent msg = new TextComponent("");
                     String letter = "";
-                    switch(t) {
+                    switch (t) {
                         case 0:
                             letter = "A";
                             msg.setClickEvent(new ClickEvent(Action.RUN_COMMAND, "/answer A"));
@@ -124,8 +132,7 @@ public class TestingPlugin extends JavaPlugin {
                 }
                 return true;
             }
-
-            return false;
         }
+        return false;
     }
 }
