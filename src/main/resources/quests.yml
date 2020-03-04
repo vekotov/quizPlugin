@@ -1,0 +1,9 @@
+Quests:
+  quest1:
+    description: '1 + 4 = ?'
+    answers:
+      A: '5'
+      B: '3'
+      C: '2'
+      D: '6'
+    right_answer: 'A'

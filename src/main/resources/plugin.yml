@@ -1,0 +1,15 @@
+name: TestPlugin
+version: 0.01
+main: vekotov.ru.TestingPlugin.TestingPlugin
+
+commands:
+  answer:
+    description: Ответить на вопрос.
+    usage: /<command> [answer]
+    permission: <plugin name>.answer
+    permission-message: У вас нет прав.
+  startgame:
+    description: Начинает игру
+    usage: /<command>
+    permission: <plugin name>.startgame
+    permission-message: У вас нет прав.
