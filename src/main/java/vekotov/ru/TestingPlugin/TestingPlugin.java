@@ -1,11 +1,12 @@
 package vekotov.ru.TestingPlugin;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.ClickEvent.Action;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -31,6 +32,9 @@ public class TestingPlugin extends JavaPlugin {
     }
 
     public void loadConfigs() {
+        playerquests.clear();
+        quests.clear();
+
         if (!quests_file.exists()) {
             saveResource("quests.yml", false);
         }
@@ -38,15 +42,14 @@ public class TestingPlugin extends JavaPlugin {
         try {
             for (String key : quests_config.getConfigurationSection("Quests").getKeys(false)) {
                 String desc = quests_config.getString("Quests." + key + ".description");
-                String right_answer = quests_config.getString("Quests." + key + ".right_answer");
-                String[] answers = new String[4];
-                int t = 0;
-                for (String answer_key : quests_config.getConfigurationSection("Quests." + key + ".answers").getKeys(false)) {
-                    answers[t] = quests_config.getString("Quests." + key + ".answers." + answer_key);
-                    t++;
-                }
 
-                Quest quest = new Quest(desc, quests.size() + 1, string_to_enum(right_answer), answers);
+                String right_answer = quests_config.getString("Quests." + key + ".right_answer");
+                ArrayList<String> answers = new ArrayList<String>();
+                for (String answer_key : quests_config.getConfigurationSection("Quests." + key + ".answers").getKeys(false)) {
+                    answers.add(quests_config.getString("Quests." + key + ".answers." + answer_key));
+                }
+                String reward = quests_config.getString("Quests." + key + ".reward");
+                Quest quest = new Quest(desc, reward,quests.size() + 1, string_to_enum(right_answer), answers);
                 quests.put(quest.id, quest);
             }
         } catch (Exception var9) {
@@ -55,7 +58,7 @@ public class TestingPlugin extends JavaPlugin {
         }
 
         if (quests.size() == 0) {
-            getLogger().info("Vekotov, ты хуйню сотворил с конфигом, у тебя 0 квестов.");
+            getLogger().info("Vekotov, ты херню сотворил с конфигом, у тебя 0 квестов.");
             IsWorking = false;
         }
     }
@@ -90,6 +93,8 @@ public class TestingPlugin extends JavaPlugin {
                 Quest quest = quests.get(playerquests.get(name));
                 if (quest.right_answer == answer) {
                     player.sendMessage("ПОЗДРАВЛЯЕМ ТЕБЯ!!!!!!!!");
+                    String command = quest.reward.replace("%player%", name);
+                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
                 }else{
                     player.sendMessage("Короче ты ответил неверно.");
                 }
@@ -100,15 +105,15 @@ public class TestingPlugin extends JavaPlugin {
 
                 int min_id = 1;
                 int max_id = playerquests.size();
-                int generated_id = min_id + (int) (Math.random() * max_id);
+                int generated_id = min_id + (int) (Math.random() * (max_id + 1));
                 playerquests.put(name, generated_id);
                 Quest quest = quests.get(generated_id);
                 player.sendMessage("Вопрос: " + quest.description + " (вы можете кликнуть на верный ответ в чате).");
                 player.sendMessage("Ответы:");
-                String[] answers = quest.answers;
+                ArrayList<String> answers = quest.answers;
 
-                for (int t = 0; t < answers.length; t++) {
-                    String s = answers[t];
+                for (int t = 0; t < answers.size(); t++) {
+                    String s = answers.get(t);
                     TextComponent msg = new TextComponent("");
                     String letter = "";
                     switch (t) {
