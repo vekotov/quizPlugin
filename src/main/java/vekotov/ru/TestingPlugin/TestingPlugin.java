@@ -53,14 +53,14 @@ public class TestingPlugin extends JavaPlugin {
                 quests.put(quest.id, quest);
             }
         } catch (Exception var9) {
-            getLogger().info("Vekotov, ты обосрался, еррорка: " + var9.getMessage());
+            getLogger().info("При загрузке плагина произошла ошибка: " + var9.getMessage());
             IsWorking = false;
         }
 
-        if (quests.size() == 0) {
-            getLogger().info("Vekotov, ты херню сотворил с конфигом, у тебя 0 квестов.");
-            IsWorking = false;
-        }
+        getLogger().info("Загружено " + quests.size() + " вопросов.");
+
+        if(quests.size() == 0)IsWorking = false;
+        else IsWorking = true;
     }
 
     public void onEnable() {
@@ -73,11 +73,11 @@ public class TestingPlugin extends JavaPlugin {
 
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         if (!(sender instanceof Player)) {
-            sender.sendMessage(ChatColor.RED + "Сцуко команды для игроков только");
+            sender.sendMessage(ChatColor.RED + "Команды только для игроков.");
             return true;
         }
         if (!IsWorking) {
-            sender.sendMessage("Плагин здох");
+            sender.sendMessage("Плагин получил ошибку при загрузке, команда недоступна.");
             return true;
         } else {
             Player player = (Player) sender;
@@ -85,7 +85,7 @@ public class TestingPlugin extends JavaPlugin {
             if (cmd.getName().equalsIgnoreCase("answer")) {
                 if (args.length != 1) return false;
                 if (!playerquests.containsKey(name)) {
-                    player.sendMessage("Нуб введи /startgame для начала, ты же еще даже вопросы не получил.");
+                    player.sendMessage("Введите /startgame для начала, чтобы получить вопрос.");
                     return true;
                 }
                 String answer_text = args[0];
