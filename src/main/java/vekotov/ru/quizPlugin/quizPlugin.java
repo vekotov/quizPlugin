@@ -1,4 +1,4 @@
-package vekotov.ru.TestingPlugin;
+package vekotov.ru.quizPlugin;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -17,13 +17,14 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class TestingPlugin extends JavaPlugin {
-    HashMap<String, Integer> playerquests = new HashMap();
-    HashMap<Integer, Quest> quests = new HashMap();
+
+public class quizPlugin extends JavaPlugin {
+    HashMap<String, Integer> playerquests = new HashMap<String, Integer>();
+    HashMap<Integer, Quest> quests = new HashMap<Integer, Quest>();
     HashMap<Messages, String> messages = new HashMap<Messages, String>();
 
     enum Messages{
-        ERROR_PLAYER_ONLY, ERROR_PLUGIN_DISABLED, NOT_GOT_QUESTION_YET, RIGHT_ANSWER, WRONG_ANSWER, QUESTION, HOVERTEXT_HINT, ANSWERS
+        ERROR_PLAYER_ONLY, ERROR_PLUGIN_DISABLED, NOT_GOT_QUESTION_YET, RIGHT_ANSWER, WRONG_ANSWER, QUESTION, HOVERTEXT_HINT_ANSWER, HOVERTEXT_HINT_RESTART, ANSWERS
     }
 
     private File quests_file = new File(getDataFolder(), "quests.yml");
@@ -40,20 +41,11 @@ public class TestingPlugin extends JavaPlugin {
         return Quest.ANSWER.A;
     }
 
-    public String enum_to_string(Quest.ANSWER answer){
-        switch (answer){
-            case A:
-                return "A";
-            case B:
-                return "B";
-            case C:
-                return "C";
-            case D:
-                return "D";
-        }
-        return "A";
-    }
-
+    /*
+ -----------------------------------------------------------------------
+ CONFIGURATION SECTION BELOW
+     */
+//TODO: Move it to configLoading.java and add exception working
     public void loadConfigs() {
         playerquests.clear();
         quests.clear();
@@ -89,8 +81,9 @@ public class TestingPlugin extends JavaPlugin {
             messages.put(Messages.NOT_GOT_QUESTION_YET, messages_config.getString("NOT_GOT_QUESTION_YET"));
             messages.put(Messages.RIGHT_ANSWER, messages_config.getString("RIGHT_ANSWER"));
             messages.put(Messages.QUESTION, messages_config.getString("QUESTION"));
-            messages.put(Messages.HOVERTEXT_HINT, messages_config.getString("HOVERTEXT_HINT"));
+            messages.put(Messages.HOVERTEXT_HINT_ANSWER, messages_config.getString("HOVERTEXT_HINT_ANSWER"));
             messages.put(Messages.ANSWERS, messages_config.getString("ANSWERS"));
+            messages.put(Messages.HOVERTEXT_HINT_RESTART, messages_config.getString("HOVERTEXT_HINT_RESTART"));
         } catch (Exception var9) {
             getLogger().warning("При загрузке плагина произошла ошибка: " + var9.getMessage());
             IsWorking = false;
@@ -98,31 +91,32 @@ public class TestingPlugin extends JavaPlugin {
 
         getLogger().info("Загружено " + quests.size() + " вопросов.");
 
-        if(quests.size() == 0)IsWorking = false;
-        else IsWorking = true;
+        IsWorking = quests.size() != 0;
     }
+
+    /*
+    ЕND OF CONFIGURATION SECTION
+    ----------------------------------
+    */
 
     public void onEnable() {
         loadConfigs();
     }
 
-    public void onDisable() {
-    }
-
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        if (!(sender instanceof Player)) {
+        if (!(sender instanceof Player)) { //If it is console
             sender.sendMessage(ChatColor.RED + messages.get(Messages.ERROR_PLAYER_ONLY));
             return true;
         }
-        if (!IsWorking) {
+        if (!IsWorking) { //If configs not loaded
             sender.sendMessage(messages.get(Messages.ERROR_PLUGIN_DISABLED));
             return true;
-        } else {
+        } else { //if all ok
             Player player = (Player) sender;
             String name = player.getName();
-            if (cmd.getName().equalsIgnoreCase("answer")) {
+            if (cmd.getName().equalsIgnoreCase("answer")) { //on /answer [letter] command
                 if (args.length != 1) return false;
-                if (!playerquests.containsKey(name)) {
+                if (!playerquests.containsKey(name)) { //checking player having question
                     player.sendMessage(messages.get(Messages.NOT_GOT_QUESTION_YET));
                     return true;
                 }
@@ -130,8 +124,11 @@ public class TestingPlugin extends JavaPlugin {
                 Quest.ANSWER answer = string_to_enum(answer_text);
                 Quest quest = quests.get(playerquests.get(name));
                 if (quest.right_answer == answer) {
+                    TextComponent msg = new TextComponent(messages.get(Messages.RIGHT_ANSWER));
+                    msg.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(messages.get(Messages.HOVERTEXT_HINT_RESTART)).create()));
+                    msg.setClickEvent(new ClickEvent(Action.RUN_COMMAND, "/startgame"));
                     player.sendMessage(messages.get(Messages.RIGHT_ANSWER));
-                    String command = quest.reward.replace("%player%", name);;
+                    String command = quest.reward.replace("%player%", name);
                     Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
                 }else{
                     player.sendMessage(messages.get(Messages.WRONG_ANSWER));
@@ -171,7 +168,7 @@ public class TestingPlugin extends JavaPlugin {
                             letter = "D";
                             msg.setClickEvent(new ClickEvent(Action.RUN_COMMAND, "/answer D"));
                     }
-                    msg.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(messages.get(Messages.HOVERTEXT_HINT)).create()));
+                    msg.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(messages.get(Messages.HOVERTEXT_HINT_ANSWER)).create()));
                     msg.setText(letter + ". " + s);
                     player.spigot().sendMessage(msg);
                 }
