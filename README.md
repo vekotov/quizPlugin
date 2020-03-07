@@ -1,4 +1,4 @@
-# minecraft_testing
+# quizPlugin
 This is pretty simple minecraft quiz plugin with ability to reward players.
 
 ///
