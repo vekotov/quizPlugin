@@ -1,7 +1,7 @@
-name: TestPlugin
+name: quizPlugin
 author: vekotov
 website: https://github.com/vekotov/minecraft_testing/
-version: 0.03
+version: '0.03'
 main: vekotov.ru.quizPlugin.quizPlugin
 
 commands:

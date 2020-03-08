@@ -27,10 +27,11 @@ public class quizPlugin extends JavaPlugin {
         ERROR_PLAYER_ONLY, ERROR_PLUGIN_DISABLED, NOT_GOT_QUESTION_YET, RIGHT_ANSWER, WRONG_ANSWER, QUESTION, HOVERTEXT_HINT_ANSWER, HOVERTEXT_HINT_RESTART, ANSWERS
     }
 
-    private File quests_file = new File(getDataFolder(), "quests.yml");
-    private File messages_file = new File(getDataFolder(), "messages.yml");
+    public File quests_file = new File(getDataFolder(), "quests.yml"); //TODO: MOVE IT TO configLoading.java
+    public File messages_file = new File(getDataFolder(), "messages.yml");
     public FileConfiguration quests_config = YamlConfiguration.loadConfiguration(quests_file);
     public FileConfiguration messages_config = YamlConfiguration.loadConfiguration(messages_file);
+
     public boolean IsWorking = true;
 
     public Quest.ANSWER string_to_enum(String answer) {
@@ -41,69 +42,11 @@ public class quizPlugin extends JavaPlugin {
         return Quest.ANSWER.A;
     }
 
-    /*
- -----------------------------------------------------------------------
- CONFIGURATION SECTION BELOW
-     */
-//TODO: Move it to configLoading.java and add exception working
-    public void loadConfigs() {
-        playerquests.clear();
-        quests.clear();
-        messages.clear();
-
-        if (!quests_file.exists()) {
-            saveResource("quests.yml", false);
-            quests_file = new File(getDataFolder(), "quests.yml");
-            quests_config = YamlConfiguration.loadConfiguration(quests_file);
-        }
-        if (!messages_file.exists()){
-            saveResource("messages.yml", false);
-            messages_file = new File(getDataFolder(), "messages.yml");
-            messages_config = YamlConfiguration.loadConfiguration(messages_file);
-        }
-
-        try {
-            for (String key : quests_config.getConfigurationSection("Quests").getKeys(false)) {
-                String desc = quests_config.getString("Quests." + key + ".description");
-
-                String right_answer = quests_config.getString("Quests." + key + ".right_answer");
-                ArrayList<String> answers = new ArrayList<String>();
-                for (String answer_key : quests_config.getConfigurationSection("Quests." + key + ".answers").getKeys(false)) {
-                    answers.add(quests_config.getString("Quests." + key + ".answers." + answer_key));
-                }
-                String reward = quests_config.getString("Quests." + key + ".reward");
-                Quest quest = new Quest(desc, reward,quests.size() + 1, string_to_enum(right_answer), answers);
-                quests.put(quest.id, quest);
-            }
-
-            messages.put(Messages.ERROR_PLAYER_ONLY, messages_config.getString("ERROR_PLAYER_ONLY"));
-            messages.put(Messages.ERROR_PLUGIN_DISABLED, messages_config.getString("ERROR_PLUGIN_DISABLED"));
-            messages.put(Messages.NOT_GOT_QUESTION_YET, messages_config.getString("NOT_GOT_QUESTION_YET"));
-            messages.put(Messages.RIGHT_ANSWER, messages_config.getString("RIGHT_ANSWER"));
-            messages.put(Messages.QUESTION, messages_config.getString("QUESTION"));
-            messages.put(Messages.HOVERTEXT_HINT_ANSWER, messages_config.getString("HOVERTEXT_HINT_ANSWER"));
-            messages.put(Messages.ANSWERS, messages_config.getString("ANSWERS"));
-            messages.put(Messages.HOVERTEXT_HINT_RESTART, messages_config.getString("HOVERTEXT_HINT_RESTART"));
-        } catch (Exception var9) {
-            getLogger().warning("При загрузке плагина произошла ошибка: " + var9.getMessage());
-            IsWorking = false;
-        }
-
-        getLogger().info("Загружено " + quests.size() + " вопросов.");
-
-        IsWorking = quests.size() != 0;
-    }
-
-    /*
-    ЕND OF CONFIGURATION SECTION
-    ----------------------------------
-    */
-
     public void onEnable() {
-        loadConfigs();
+        configLoading.loadConfigs(this);
     }
 
-    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) { //TODO: MOVE IT TO ANOTHER FILE
         if (!(sender instanceof Player)) { //If it is console
             sender.sendMessage(ChatColor.RED + messages.get(Messages.ERROR_PLAYER_ONLY));
             return true;
@@ -123,16 +66,17 @@ public class quizPlugin extends JavaPlugin {
                 String answer_text = args[0];
                 Quest.ANSWER answer = string_to_enum(answer_text);
                 Quest quest = quests.get(playerquests.get(name));
+                TextComponent msg = new TextComponent();
+                msg.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(messages.get(Messages.HOVERTEXT_HINT_RESTART)).create()));
+                msg.setClickEvent(new ClickEvent(Action.RUN_COMMAND, "/startgame"));
                 if (quest.right_answer == answer) {
-                    TextComponent msg = new TextComponent(messages.get(Messages.RIGHT_ANSWER));
-                    msg.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(messages.get(Messages.HOVERTEXT_HINT_RESTART)).create()));
-                    msg.setClickEvent(new ClickEvent(Action.RUN_COMMAND, "/startgame"));
-                    player.sendMessage(messages.get(Messages.RIGHT_ANSWER));
+                    msg.setText(messages.get(Messages.RIGHT_ANSWER));
                     String command = quest.reward.replace("%player%", name);
                     Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
                 }else{
-                    player.sendMessage(messages.get(Messages.WRONG_ANSWER));
+                    msg.setText(messages.get(Messages.WRONG_ANSWER));
                 }
+                player.spigot().sendMessage(msg);
                 playerquests.remove(name);
                 return true;
             } else if (cmd.getName().equalsIgnoreCase("startgame")) {
@@ -148,6 +92,7 @@ public class quizPlugin extends JavaPlugin {
                 ArrayList<String> answers = quest.answers;
 
                 for (int t = 0; t < answers.size(); t++) {
+                    //TODO: Add shuffling answers before printing to (against remembering by location)
                     String s = answers.get(t);
                     TextComponent msg = new TextComponent("");
                     String letter = "";
