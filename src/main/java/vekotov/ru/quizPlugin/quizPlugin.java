@@ -1,6 +1,5 @@
 package vekotov.ru.quizPlugin;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -12,8 +11,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -26,11 +23,6 @@ public class quizPlugin extends JavaPlugin {
     enum Messages{
         ERROR_PLAYER_ONLY, ERROR_PLUGIN_DISABLED, NOT_GOT_QUESTION_YET, RIGHT_ANSWER, WRONG_ANSWER, QUESTION, HOVERTEXT_HINT_ANSWER, HOVERTEXT_HINT_RESTART, ANSWERS
     }
-
-    public File quests_file = new File(getDataFolder(), "quests.yml"); //TODO: MOVE IT TO configLoading.java
-    public File messages_file = new File(getDataFolder(), "messages.yml");
-    public FileConfiguration quests_config = YamlConfiguration.loadConfiguration(quests_file);
-    public FileConfiguration messages_config = YamlConfiguration.loadConfiguration(messages_file);
 
     public boolean IsWorking = true;
 
