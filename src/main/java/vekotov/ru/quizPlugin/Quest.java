@@ -6,6 +6,7 @@ public class Quest {
     public String description;
     public String reward;
     //TODO: Create categories
+    //TODO: Add various types of printing answers (1-line, 2-line, 4-line)
     public int id;
     public ANSWER right_answer;
     public ArrayList<String> answers;

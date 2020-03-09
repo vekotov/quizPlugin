@@ -30,8 +30,13 @@ public class configLoading {
             messages_config = YamlConfiguration.loadConfiguration(messages_file);
         }
 
-        //TODO: change try/catch structure to handle errors in yml
-        //сраная срань но я это сделаю
+
+        /*
+
+        How does anti-fool defence work: we handling a situation if config doesnt exist
+        and if config broken (in which case we will handle exception dropped by get(something)
+
+         */
         for (String key : quests_config.getConfigurationSection("Quests").getKeys(false)) { //for every Quest do that
             boolean skip_quest = false; //if something going wrong we just skipping quest with wrong configuration
 

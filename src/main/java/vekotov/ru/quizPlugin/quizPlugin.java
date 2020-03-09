@@ -1,6 +1,5 @@
 package vekotov.ru.quizPlugin;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -36,6 +35,7 @@ public class quizPlugin extends JavaPlugin {
 
     public void onEnable() {
         configLoading.loadConfigs(this);
+        this.getCommand("startgame").setExecutor(new startgame_cmd(this));
     }
 
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) { //TODO: MOVE IT TO ANOTHER FILE
@@ -71,47 +71,7 @@ public class quizPlugin extends JavaPlugin {
                 player.spigot().sendMessage(msg);
                 playerquests.remove(name);
                 return true;
-            } else if (cmd.getName().equalsIgnoreCase("startgame")) {
-                if (args.length != 0) return false;
-
-                int min_id = 1;
-                int max_id = playerquests.size();
-                int generated_id = min_id + (int) (Math.random() * (max_id + 1));
-                playerquests.put(name, generated_id);
-                Quest quest = quests.get(generated_id);
-                player.sendMessage(messages.get(Messages.QUESTION).replace("%question%", quest.description));
-                player.sendMessage(messages.get(Messages.ANSWERS));
-                ArrayList<String> answers = quest.answers;
-
-                for (int t = 0; t < answers.size(); t++) {
-                    //TODO: Add shuffling answers before printing to (against remembering by location)
-                    String s = answers.get(t);
-                    TextComponent msg = new TextComponent("");
-                    String letter = "";
-                    switch (t) {
-                        case 0:
-                            letter = "A";
-                            msg.setClickEvent(new ClickEvent(Action.RUN_COMMAND, "/answer A"));
-                            break;
-                        case 1:
-                            letter = "B";
-                            msg.setClickEvent(new ClickEvent(Action.RUN_COMMAND, "/answer B"));
-                            break;
-                        case 2:
-                            letter = "C";
-                            msg.setClickEvent(new ClickEvent(Action.RUN_COMMAND, "/answer C"));
-                            break;
-                        case 3:
-                            letter = "D";
-                            msg.setClickEvent(new ClickEvent(Action.RUN_COMMAND, "/answer D"));
-                    }
-                    msg.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(messages.get(Messages.HOVERTEXT_HINT_ANSWER)).create()));
-                    msg.setText(letter + ". " + s);
-                    player.spigot().sendMessage(msg);
-                }
-                return true;
-            }
+            } else return cmd.getName().equalsIgnoreCase("startgame");
         }
-        return false;
     }
 }
