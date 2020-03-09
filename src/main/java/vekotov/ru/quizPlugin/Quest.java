@@ -5,7 +5,7 @@ import java.util.ArrayList;
 public class Quest {
     public String description;
     public String reward;
-    public String category; //TODO: Create categories
+    //TODO: Create categories
     public int id;
     public ANSWER right_answer;
     public ArrayList<String> answers;
