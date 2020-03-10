@@ -25,19 +25,24 @@ public class startgame_cmd implements CommandExecutor {
             sender.sendMessage(ChatColor.RED + p.messages.get(quizPlugin.Messages.ERROR_PLAYER_ONLY));
             return true;
         }
+
+        if (!p.IsWorking) { //If configs not loaded
+            sender.sendMessage(p.messages.get(quizPlugin.Messages.ERROR_PLUGIN_DISABLED));
+            return true;
+        }
+
         Player player = (Player) sender;
-        String name = player.getName();
+        String name = player.getName(); //getting name of player
 
-        if (args.length != 0) return false;
 
-        int min_id = 1;
-        int max_id = p.playerquests.size();
-        int generated_id = min_id + (int) (Math.random() * (max_id + 1));
-        p.playerquests.put(name, generated_id);
-        Quest quest = p.quests.get(generated_id);
-        player.sendMessage(p.messages.get(quizPlugin.Messages.QUESTION).replace("%question%", quest.description));
-        player.sendMessage(p.messages.get(quizPlugin.Messages.ANSWERS));
-        ArrayList<String> answers = quest.answers;
+        int min_id = 1; //minimal = 1 quest
+        int max_id = p.playerquests.size(); //maximal = number of quest
+        int generated_id = min_id + (int) (Math.random() * (max_id + 1)); //getting random id //TODO: Check it, looks like here are error in generating random
+        p.playerquests.put(name, generated_id); //putting player in list players with quests
+        Quest quest = p.quests.get(generated_id); //creating quest for him
+        player.sendMessage(p.messages.get(quizPlugin.Messages.QUESTION).replace("%question%", quest.description)); //sending him a question
+        player.sendMessage(p.messages.get(quizPlugin.Messages.ANSWERS)); //sending him a "answers:" line
+        ArrayList<String> answers = quest.answers; //list of answers //TODO: rework it to different number of lines
 
         for (int t = 0; t < answers.size(); t++) {
             //TODO: Add shuffling answers before printing to (against remembering by location)
