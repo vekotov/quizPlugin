@@ -35,12 +35,15 @@ public class CmdStartgame implements CommandExecutor {
         String name = player.getName(); //getting name of player
 
 
-        int min_id = 1; //minimal = 1 quest
-        int max_id = p.playerquests.size(); //maximal = number of quest
-        int generated_id = min_id + (int) (Math.random() * (max_id + 1)); //getting random id //TODO: Check it, looks like here are error in generating random
+        int max_id = p.quests.size(); //maximal = number of quest
+        int generated_id = (int) (Math.random() * max_id); //getting random id
+
         p.playerquests.put(name, generated_id); //putting player in list players with quests
         Quest quest = p.quests.get(generated_id); //creating quest for him
+
         player.sendMessage(p.messages.get("QUESTION").replace("%question%", quest.description)); //sending him a question
+
+
         player.sendMessage(p.messages.get("ANSWERS")); //sending him a "answers:" line
         ArrayList<String> answers = quest.answers; //list of answers //TODO: rework it to different number of lines
 

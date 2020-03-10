@@ -66,7 +66,7 @@ public class ConfigLoading {
             reward = safeLoadString(key, "reward");
             if(reward == null)continue;
 
-            Quest quest = new Quest(desc, reward, p.quests.size() + 1, right_answer, answers); //create new quest
+            Quest quest = new Quest(desc, reward, p.quests.size(), right_answer, answers); //create new quest
             p.quests.put(quest.id, quest); //add quest to global list
         }
 
