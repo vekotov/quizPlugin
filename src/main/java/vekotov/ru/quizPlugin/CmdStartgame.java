@@ -12,22 +12,22 @@ import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 
-public class startgame_cmd implements CommandExecutor {
+public class CmdStartgame implements CommandExecutor {
 
     private quizPlugin p;
 
-    public startgame_cmd(quizPlugin plugin) {
+    public CmdStartgame(quizPlugin plugin) {
         this.p = plugin; // Store the plugin in situations where you need it.
     }
 
     public boolean onCommand(CommandSender sender, Command command, String s, String[] args) {
         if (!(sender instanceof Player)) { //If it is console
-            sender.sendMessage(ChatColor.RED + p.messages.get(quizPlugin.Messages.ERROR_PLAYER_ONLY));
+            sender.sendMessage(ChatColor.RED + p.messages.get("ERROR_PLAYER_ONLY"));
             return true;
         }
 
         if (!p.IsWorking) { //If configs not loaded
-            sender.sendMessage(p.messages.get(quizPlugin.Messages.ERROR_PLUGIN_DISABLED));
+            sender.sendMessage(p.messages.get("ERROR_PLUGIN_DISABLED"));
             return true;
         }
 
@@ -40,8 +40,8 @@ public class startgame_cmd implements CommandExecutor {
         int generated_id = min_id + (int) (Math.random() * (max_id + 1)); //getting random id //TODO: Check it, looks like here are error in generating random
         p.playerquests.put(name, generated_id); //putting player in list players with quests
         Quest quest = p.quests.get(generated_id); //creating quest for him
-        player.sendMessage(p.messages.get(quizPlugin.Messages.QUESTION).replace("%question%", quest.description)); //sending him a question
-        player.sendMessage(p.messages.get(quizPlugin.Messages.ANSWERS)); //sending him a "answers:" line
+        player.sendMessage(p.messages.get("QUESTION").replace("%question%", quest.description)); //sending him a question
+        player.sendMessage(p.messages.get("ANSWERS")); //sending him a "answers:" line
         ArrayList<String> answers = quest.answers; //list of answers //TODO: rework it to different number of lines
 
         for (int t = 0; t < answers.size(); t++) {
@@ -66,7 +66,7 @@ public class startgame_cmd implements CommandExecutor {
                     letter = "D";
                     msg.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/answer D"));
             }
-            msg.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(p.messages.get(quizPlugin.Messages.HOVERTEXT_HINT_ANSWER)).create()));
+            msg.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(p.messages.get("HOVERTEXT_HINT_ANSWER")).create()));
             msg.setText(letter + ". " + text);
             player.spigot().sendMessage(msg);
         }
