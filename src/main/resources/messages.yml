@@ -7,3 +7,5 @@ QUESTION: 'Вопрос: %question% (вы можете кликнуть на в�
 HOVERTEXT_HINT_ANSWER: 'НАЖМИТЕ ЧТОБЫ ОТВЕТИТЬ'
 HOVERTEXT_HINT_RESTART: 'НАЖМИТЕ ЧТОБЫ ПОЛУЧИТЬ НОВЫЙ ВОПРОС'
 ANSWERS: 'Ответы:'
+ANSWER_STYLE: '%letter%. %answer%'
+ANSWERS_SEPARATOR: ' || '

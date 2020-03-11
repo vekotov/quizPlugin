@@ -42,11 +42,9 @@ public class ConfigLoading {
 
          */
         for (String key : quests_config.getConfigurationSection("Quests").getKeys(false)) { //for every Quest do that
-            String desc;
-            String right_answer;
-            String reward;
 
             ArrayList<String> answers = new ArrayList<String>(); //new answers list
+
             for (String answer_key : quests_config.getConfigurationSection("Quests." + key + ".answers").getKeys(false)) { //for every answer in config
                 String answer = safeLoadString(key, "answers." + answer_key);
                 if(answer == null)continue;
@@ -57,16 +55,31 @@ public class ConfigLoading {
                 p.getLogger().warning("При загрузке файла quests.yml произошла ошибка: квест " + key + " имеет всего " + answers.size() + " ответов, нужно миниум 2. Квест не будет загружен.");
             }
 
-            desc = safeLoadString(key, "description");
+            String desc = safeLoadString(key, "description");
             if(desc == null)continue;
 
-            right_answer = safeLoadString(key, "right_answer");
+            String right_answer = safeLoadString(key, "right_answer");
             if(right_answer == null)continue;
 
-            reward = safeLoadString(key, "reward");
-            if(reward == null)continue;
+            String reward = safeLoadString(key, "reward");
+            if(reward == null){
+                p.getLogger().info("Параметр reward не обнаружен у " + key + ". Награды за квест не будет, но квест будет загружен.");
+                reward = "";
+            }
 
-            Quest quest = new Quest(desc, reward, p.quests.size(), right_answer, answers); //create new quest
+            String answer_style = safeLoadString(key, "style");
+            if(answer_style == null){
+                p.getLogger().info("Параметр answer_style не обнаружен у " + key + ". Взят стандартный.");
+                answer_style = "4-line";
+            }
+
+            if(!answer_style.equals("1-line") && !answer_style.equals("2-line") && !answer_style.equals("4-line")){
+                p.getLogger().warning("При загрузке файла quests.yml произошла ошибка: квест " + key +
+                        " имеет недопустимое значение параметра answer_style. Допустимые: 1-line, 2-line, 4-line. Был взят стандартный.");
+                answer_style = "4-line";
+            }
+
+            Quest quest = new Quest(desc, answer_style, reward, p.quests.size(), right_answer, answers); //create new quest
             p.quests.put(quest.id, quest); //add quest to global list
         }
 
@@ -79,7 +92,9 @@ public class ConfigLoading {
                 "QUESTION",
                 "HOVERTEXT_HINT_ANSWER",
                 "HOVERTEXT_HINT_RESTART",
-                "ANSWERS"
+                "ANSWERS",
+                "ANSWER_STYLE",
+                "ANSWERS_SEPARATOR"
         };
 
         for(String key : keys){
@@ -127,6 +142,12 @@ public class ConfigLoading {
     }
 
     void exceptionLogQuestLoading(String key, String field){
-        p.getLogger().warning("При загрузке файла quests.yml произошла ошибка: квесту " + key  + " не удалось загрузить поле " + field + ". Квест не будет загружен.");
+        if(isMandatoryField(field)) p.getLogger().warning("При загрузке файла quests.yml произошла ошибка: квесту "
+                + key  + " не удалось загрузить поле " + field + ". Квест не будет загружен.");
+    }
+
+    boolean isMandatoryField(String field){
+        return !field.equals("reward") &&
+                !field.equals("answer_style");
     }
 }

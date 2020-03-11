@@ -11,6 +11,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 public class CmdStartgame implements CommandExecutor {
 
@@ -45,34 +46,62 @@ public class CmdStartgame implements CommandExecutor {
 
 
         player.sendMessage(p.messages.get("ANSWERS")); //sending him a "answers:" line
-        ArrayList<String> answers = quest.answers; //list of answers //TODO: rework it to different number of lines
+        ArrayList<String> answers = quest.answers; //list of answers
 
-        for (int t = 0; t < answers.size(); t++) {
-            //TODO: Add shuffling answers before printing to (against remembering by location)
-            String text = answers.get(t);
-            TextComponent msg = new TextComponent("");
-            String letter = "";
-            switch (t) {
-                case 0:
-                    letter = "A";
-                    msg.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/answer A"));
-                    break;
-                case 1:
-                    letter = "B";
-                    msg.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/answer B"));
-                    break;
-                case 2:
-                    letter = "C";
-                    msg.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/answer C"));
-                    break;
-                case 3:
-                    letter = "D";
-                    msg.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/answer D"));
+        Iterator<String> iterator = answers.iterator();
+
+
+        int style;
+        if(quest.answer_style.equals("4-line"))style = 1;
+        else if(quest.answer_style.equals("2-line"))style = 2;
+        else if(quest.answer_style.equals("1-line"))style = 4;
+        else return true;
+
+        TextComponent msg = new TextComponent();
+
+        int n = 1;
+        while(iterator.hasNext()){ //TODO: Add shuffling answers before printing to (against remembering by location)
+            String answer_text = iterator.next();
+
+            msg.addExtra(p.messages.get("ANSWERS_SEPARATOR"));
+
+            TextComponent answerButton = new TextComponent();
+            String answer = p.messages.get("ANSWER_STYLE");
+            answer = answer.replace("%letter%", getLetter(n));  //%letter%. %answer%
+            answer = answer.replace("%answer%", answer_text);
+            answerButton.setText(answer);
+            answerButton.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(p.messages.get("HOVERTEXT_HINT_ANSWER")).create()));
+            answerButton.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/answer " + getLetter(n)));
+            msg.addExtra(answerButton);
+            p.getLogger().info("STRING = " + msg.getText() + "   /// n = " + n + " /// style = " + style);
+            if(n % style == 0){
+                player.spigot().sendMessage(msg);
+                msg = new TextComponent();
             }
-            msg.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(p.messages.get("HOVERTEXT_HINT_ANSWER")).create()));
-            msg.setText(letter + ". " + text);
+            n++;
+        }
+
+        p.getLogger().info("RESULT n = " + n);
+        if((n-1) % style != 0){
+            p.getLogger().info("SENT VIA DUBL");
+            player.spigot().sendMessage(msg);
+            player.spigot().sendMessage(new TextComponent(" "));
+        }else{
+            p.getLogger().info("SENT VIA ONE");
             player.spigot().sendMessage(msg);
         }
+
         return true;
+    }
+
+
+    String getLetter(int number){
+        switch (number){
+            case 1: return "A";
+            case 2: return "B";
+            case 3: return "C";
+            case 4: return "D";
+        }
+        return "";
     }
 }

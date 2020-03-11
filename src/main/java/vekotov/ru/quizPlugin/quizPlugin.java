@@ -12,7 +12,7 @@ public class quizPlugin extends JavaPlugin {
     public boolean IsWorking = true;
 
     public void onEnable() {
-        ConfigLoading cf = new ConfigLoading(this);
+        new ConfigLoading(this);
         this.getCommand("startgame").setExecutor(new CmdStartgame(this));
         this.getCommand("answer").setExecutor(new CmdAnswer(this));
     }
